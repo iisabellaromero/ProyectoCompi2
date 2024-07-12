@@ -1,0 +1,7 @@
+start: skip
+enter 2
+alloc 2
+mark
+pusha Lmain
+call
+halt

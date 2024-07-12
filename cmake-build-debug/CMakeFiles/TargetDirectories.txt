@@ -1,0 +1,4 @@
+C:/Users/USUARIO/Downloads/ProyectoCompi2Aux/cmake-build-debug/CMakeFiles/IMP.dir
+C:/Users/USUARIO/Downloads/ProyectoCompi2Aux/cmake-build-debug/CMakeFiles/SVM.dir
+C:/Users/USUARIO/Downloads/ProyectoCompi2Aux/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/USUARIO/Downloads/ProyectoCompi2Aux/cmake-build-debug/CMakeFiles/rebuild_cache.dir

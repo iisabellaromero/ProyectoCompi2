@@ -1,0 +1,17 @@
+# ninja log v5
+4	996	7425149553269793	CMakeFiles/ProyectoCompi2Aux.dir/main.cpp.obj	27a5ae7a30b20512
+998	1120	7425149554476350	ProyectoCompi2Aux.exe	fb2743f79b507f4e
+23	727	7425150177248412	CMakeFiles/IMP.dir/imp_value.cpp.obj	b41497e5c0c9a9c7
+33	921	7425150179191647	CMakeFiles/IMP.dir/imp_type.cpp.obj	a98b89ae8fe6b434
+14	937	7425150179274646	CMakeFiles/IMP.dir/imp_printer.cpp.obj	b914a67bbf4682f3
+7	1189	7425150181904119	CMakeFiles/IMP.dir/imp.cpp.obj	6357b066ee050a5d
+11	1358	7425150183588923	CMakeFiles/IMP.dir/imp_parser.cpp.obj	38cfaa459b60212b
+2	1463	7425150184648768	CMakeFiles/IMP.dir/test_imp_fun.cpp.obj	40829dc2e87e3e1a
+18	1474	7425150184755313	CMakeFiles/IMP.dir/imp_interpreter.cpp.obj	898e750b682a420e
+39	1585	7425150185870288	CMakeFiles/IMP.dir/imp_codegen.cpp.obj	c487b60d026cbd3
+28	1715	7425150187163730	CMakeFiles/IMP.dir/imp_typechecker.cpp.obj	82cdcb6ad08bddee
+1715	2195	7425150191938070	IMP.exe	263060b9635afa08
+2	571	7425154084949316	CMakeFiles/SVM.dir/svm_run.cpp.obj	384eb8b233014f76
+11	675	7425154085985255	CMakeFiles/SVM.dir/svm.cpp.obj	a942258c190e2e4a
+7	700	7425154086232223	CMakeFiles/SVM.dir/svm_parser.cpp.obj	fb4ce78bff0cd5d4
+700	826	7425154087459587	SVM.exe	2594b04290762d00
