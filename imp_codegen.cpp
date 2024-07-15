@@ -75,6 +75,8 @@ void ImpCodeGen::visit(Program* p) {
 void ImpCodeGen::visit(Body * b) {
 
   // guardar direccion inicial current_dir
+  int restoreDir = current_dir;
+  current_dir = 0;
   
   direcciones.add_level();
   
@@ -84,6 +86,7 @@ void ImpCodeGen::visit(Body * b) {
   direcciones.remove_level();
 
   // restaurar dir
+  current_dir = restoreDir;
   return;
 }
 
@@ -123,15 +126,35 @@ void ImpCodeGen::visit(FunDec* fd) {
   VarEntry ventry;
 
   // agregar direcciones de argumentos
+    list<string>::iterator it = fd->vars.begin();
+    for (int i = 0; i < fd->vars.size(); ++i){
+        current_dir++;
+        ventry.dir = current_dir-(m+3);
+        ventry.is_global = false;
+        direcciones.add_var(*it, ventry);
+        std::advance(it, 1);
+    }
 
   // agregar direccion de return
+  // si es void no es necesario
+  // esto esta raro... el return no debería ir debajo de los argumentos en terminos de direcciones?
+  if (fd->rtype != "void") {
+    current_dir++;
+    ventry.dir = current_dir;
+    ventry.is_global = false;
+    direcciones.add_var("return", ventry);
+  }
+
 
   // generar codigo para fundec
-
   num_params = m;
+  mem_locals = fentry.mem_locals;
+  max_stack = fentry.max_stack;
+    codegen(get_flabel(fd->fname),"skip");
+    codegen(nolabel, "enter", max_stack+mem_locals);
+    codegen(nolabel, "alloc", mem_locals);
 
-  //fd->body->accept(this);
-  // -- sacar comentarios para generar codigo del cuerpo
+    fd->body->accept(this);
 
   return;
 }
@@ -149,7 +172,12 @@ void ImpCodeGen::visit(AssignStatement* s) {
   s->rhs->accept(this);
   VarEntry ventry = direcciones.lookup(s->id);
   // generar codigo store/storer
-  codegen(nolabel,"store", 100); // modificar 100 global vs local
+  // Si es global, store. Si es local, storer
+  if (ventry.is_global) {
+      codegen(nolabel, "store", ventry.dir);
+  } else {
+      codegen(nolabel, "storer", ventry.dir);
+  }
 
   return;
 }
@@ -193,8 +221,12 @@ void ImpCodeGen::visit(WhileStatement* s) {
 
 void ImpCodeGen::visit(ReturnStatement* s) {
   // agregar codigo
-  
-  codegen(nolabel,"return", 100);  // modifcar 100
+  // generar codigo en la pila para obtener el valor
+  if (s->e) {
+      s->e->accept(this);
+      codegen(nolabel, "storer", -(num_params+3));
+  }
+  codegen(nolabel,"return", num_params+3);
   return;
 }
 
@@ -262,7 +294,17 @@ int ImpCodeGen::visit(FCallExp* e) {
   ImpType ftype = fentry.ftype;
 
   // agregar codigo
-
+  // si tiene valor de retorno, hacer alloc
+  if (ftype.types.back() != ImpType::TType::VOID) {
+      codegen(nolabel, "alloc", 1);
+  }
+  list<Exp*>::iterator it = e->args.begin();
+  for (int i = 0; i < e->args.size(); i++) {
+      (*it)->accept(this);
+      std::advance(it, 1);
+  }
+  codegen(nolabel, "mark");
+  codegen(nolabel, "pusha", "L"+fentry.fname);
   codegen(nolabel,"call");
   return 0;
 }

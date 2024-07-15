@@ -62,13 +62,14 @@ void ImpTypeChecker::visit(Program* p) {
 
 void ImpTypeChecker::visit(Body* b) {
   // guardar direccion actual (dir)
-  
+  int old_dir = dir;
+
   env.add_level();
   b->var_decs->accept(this);
   b->slist->accept(this);
   env.remove_level();
   // restaurar direccion de entrada
-  
+  dir = old_dir;
   return;
 }
 
@@ -126,6 +127,8 @@ void ImpTypeChecker::visit(VarDec* vd) {
   for (it = vd->vars.begin(); it != vd->vars.end(); ++it) {
     env.add_var(*it, type);
     // actualizar dir y max_dir
+    dir++;
+    if (dir > max_dir) { max_dir = dir; }
   }   
   return;
 }
@@ -140,7 +143,7 @@ void ImpTypeChecker::visit(FunDec* fd) {
   for (it = fd->vars.begin(); it != fd->vars.end(); ++it, i++) {
     ptype.set_basic_type(funtype.types[i]);
     env.add_var(*it,ptype);
-  } 
+  }
   env.add_var("return", rtype);
   fd->body->accept(this);
   env.remove_level();
@@ -165,6 +168,8 @@ void ImpTypeChecker::visit(AssignStatement* s) {
     exit(0);
   }
   // que hacer con sp?
+  // quitamos uno porque el assign consume el right hand side
+    sp_decr(1);
   ImpType var_type = env.lookup(s->id);  
   if (!type.match(var_type)) {
     cout << "Tipo incorrecto en Assign a " << s->id << endl;
@@ -176,6 +181,8 @@ void ImpTypeChecker::visit(AssignStatement* s) {
 void ImpTypeChecker::visit(PrintStatement* s) {
   s->e->accept(this);
   // que hacer con sp?
+  // reducimos uno porque el print consume un espacio
+    sp_decr(1);
   return;
 }
 
@@ -185,6 +192,8 @@ void ImpTypeChecker::visit(IfStatement* s) {
     exit(0);
   }
   // que hacer con sp?
+    // quitamos uno porque se consume la condicion
+    sp_decr(1);
   s->tbody->accept(this);
   if (s->fbody != NULL)
     s->fbody->accept(this);
@@ -197,6 +206,8 @@ void ImpTypeChecker::visit(WhileStatement* s) {
     exit(0);
   }
   // que hacer con sp?
+    // reducimos en 1 porque se consume la condición
+    sp_decr(1);
   s->body->accept(this);
  return;
 }
@@ -204,11 +215,13 @@ void ImpTypeChecker::visit(WhileStatement* s) {
 void ImpTypeChecker::visit(ReturnStatement* s) {
  ImpType rtype = env.lookup("return");
   ImpType etype;
-  if (s->e != NULL)
-    etype = s->e->accept(this);
-  // que hacer con sp?
-  else
-    etype = voidtype;
+  if (s->e != NULL) {
+      etype = s->e->accept(this);
+      // que hacer con sp?
+      // incrementamos uno porque el return con valor agrega un valor en la pila
+      sp_incr(1);
+  }
+  else { etype = voidtype; }
   if (!rtype.match(etype)) {
     cout << "Return type mismatch: " << rtype << "<->" << etype << endl;
     exit(0);
@@ -240,21 +253,29 @@ ImpType ImpTypeChecker::visit(BinaryExp* e) {
     break;
   }
   // que hacer con sp?
+  // reducimos uno porque se consumen los dos valores y luego se agrega uno
+    sp_decr(1);
   return result;
 }
 
 ImpType ImpTypeChecker::visit(NumberExp* e) {
   // que hacer con sp?
+  // incrementamos uno porque el numero agrega un valor en la pila
+    sp_incr(1);
   return inttype;
 }
 
 ImpType ImpTypeChecker::visit(TrueFalseExp* e) {
   // que hacer con sp?
+    // incrementamos uno porque el true/false agrega un valor en la pila
+        sp_incr(1);
   return booltype;
 }
 
 ImpType ImpTypeChecker::visit(IdExp* e) {
   // que hacer con sp?
+    // incrementamos uno porque el id exp agrega un valor en la pila
+    sp_incr(1);
   if (env.check(e->id))
     return env.lookup(e->id);
   else {
@@ -273,8 +294,11 @@ ImpType ImpTypeChecker::visit(CondExp* e) {
     exit(0);
   }
   // que hacer con sp?
+  // reducimos en uno porque se consume la condición
+    sp_decr(1);
   ImpType ttype =  e->etrue->accept(this);
   // que hacer con sp?
+  // nada. el incremento lo maneja o el etrue o efalse
   if (!ttype.match(e->efalse->accept(this))) {
     cout << "Tipos en ifexp deben de ser iguales" << endl;
     exit(0);
@@ -300,6 +324,14 @@ ImpType ImpTypeChecker::visit(FCallExp* e) {
   rtype.set_basic_type(funtype.types[num_fun_args]);
 
   // que hacer con sp y el valor de retorno?
+    // incrementamos uno más si el valor de retorno no es void
+    if (rtype.ttype != ImpType::VOID) {
+        sp_incr(1);
+    }
+    // reducimos por la cantidad de argumentos ya que serán consumidos
+    for (int i = 0; i < num_fcall_args; i++) {
+        sp_decr(1);
+    }
   
   if (num_fun_args != num_fcall_args) {
     cout << "(Function call) Numero de argumentos no corresponde a declaracion de: " << e->fname << endl;
