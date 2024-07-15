@@ -34,6 +34,7 @@ public:
   void visit(PrintStatement*);
   void visit(IfStatement*);
   void visit(WhileStatement*);
+  void visit(ForDoStm* s);
   void visit(ReturnStatement*);
   void visit(FCallStm* s);
 

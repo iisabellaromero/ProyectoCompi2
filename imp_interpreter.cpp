@@ -131,6 +131,21 @@ void ImpInterpreter::visit(WhileStatement* s) {
  return;
 }
 
+void ImpInterpreter::visit(ForDoStm* s) {
+    env.add_level();
+    ImpValue forVar;
+    forVar.type = TINT;
+    forVar.int_value = s->start->accept(this).int_value;
+    env.add_var(s->id, forVar);
+    int endValue = s->end->accept(this).int_value;
+    while(env.lookup(s->id).int_value <= endValue) {
+        s->body->accept(this);
+        forVar.int_value++;
+        env.update(s->id, forVar);
+    }
+    env.remove_level();
+}
+
 void ImpInterpreter::visit(ReturnStatement* s) {
   if (s->e != NULL)
     retval = s->e->accept(this);

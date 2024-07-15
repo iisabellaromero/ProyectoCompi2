@@ -3,10 +3,10 @@
 #include "imp_parser.hh"
 
 
-const char* Token::token_names[32] = {
+const char* Token::token_names[35] = {
   "LPAREN" , "RPAREN", "PLUS", "MINUS", "MULT","DIV","EXP","LT","LTEQ","EQ",
   "NUM", "ID", "PRINT", "SEMICOLON", "COMMA", "ASSIGN", "CONDEXP", "IF", "THEN", "ELSE", "ENDIF", "WHILE", "DO",
-  "ENDWHILE", "ERR", "END", "VAR", "RETURN", "FUN", "ENDFUN", "TRUE", "FALSE" };
+  "ENDWHILE", "ERR", "END", "VAR", "RETURN", "FUN", "ENDFUN", "TRUE", "FALSE", "FOR", "IN", "ENDFOR"};
 
 Token::Token(Type type):type(type) { lexema = ""; }
 
@@ -43,6 +43,9 @@ Scanner::Scanner(string s):input(s),first(0),current(0) {
   reserved["endfun"] = Token::ENDFUN;
   reserved["true"] = Token::TRUE;
   reserved["false"] = Token::FALSE;
+  reserved["for"] = Token::FOR;
+  reserved["in"] = Token::IN;
+  reserved["endfor"] = Token::ENDFOR;
 }
 
 Token* Scanner::nextToken() {
@@ -356,6 +359,34 @@ Stm* Parser::parseStatement() {
     if (!match(Token::RPAREN)) parserError("Esperaba 'rparen'");
     s = new ReturnStatement(e);
     
+  } else if (match(Token::FOR)) {
+      if (!match(Token::ID)) {
+          parserError("Esperaba id");
+      }
+      string lex = previous->lexema;
+      if (!match(Token::IN)) {
+          parserError("Esperaba 'in'");
+      }
+      if (!match(Token::LPAREN)) {
+          parserError("Esperaba 'lparen'");
+      }
+      Exp *start, *end;
+      start = parseExpression();
+      if (!match(Token::COMMA)) {
+          parserError("Esperaba 'coma'");
+      }
+      end = parseExpression();
+      if (!match(Token::RPAREN)) {
+          parserError("Esperaba 'rparen'");
+      }
+      if (!match(Token::DO)) {
+          parserError("Esperaba 'do'");
+      }
+      tb = parseBody();
+      if (!match(Token::ENDFOR)) {
+          parserError("Esperaba 'endfor'");
+      }
+      s = new ForDoStm(lex, start, end, tb);
   } else {
     cout << "No se encontro Statement" << endl;
     exit(0);

@@ -219,6 +219,35 @@ void ImpCodeGen::visit(WhileStatement* s) {
   return;
 }
 
+void ImpCodeGen::visit(ForDoStm* s) {
+    string L1 = next_label();
+    string L2 = next_label();
+
+    direcciones.add_level();
+    std::list<string> var;
+    var.push_back(s->id);
+    auto* forVarDeclaration = new VarDec("int", var);
+    forVarDeclaration->accept(this);
+    s->start->accept(this);
+    auto* startAssignStatement = new AssignStatement(s->id, s->start);
+    startAssignStatement->accept(this);
+    codegen(L1, "skip");
+    auto* CompareExpression = new BinaryExp(new IdExp(s->id), s->end, BinaryOp::LTEQ);
+    CompareExpression->accept(this);
+    codegen(nolabel, "jmpz", L2);
+    s->body->accept(this);
+    auto* varIncrease = new AssignStatement(s->id, new BinaryExp(new IdExp(s->id),new NumberExp(1), BinaryOp::PLUS));
+    varIncrease->accept(this);
+    codegen(nolabel, "goto", L1);
+    codegen(L2, "skip");
+    direcciones.remove_level();
+
+    delete forVarDeclaration;
+    delete startAssignStatement;
+    delete varIncrease;
+    delete CompareExpression;
+}
+
 void ImpCodeGen::visit(ReturnStatement* s) {
   // agregar codigo
   // generar codigo en la pila para obtener el valor

@@ -29,6 +29,7 @@ public:
   void visit(PrintStatement*);
   void visit(IfStatement*);
   void visit(WhileStatement*);
+  void visit(ForDoStm* s);
   void visit(ReturnStatement* e); // new
   void visit(FCallStm* s);
   

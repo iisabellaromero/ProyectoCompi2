@@ -212,6 +212,23 @@ void ImpTypeChecker::visit(WhileStatement* s) {
  return;
 }
 
+void ImpTypeChecker::visit(ForDoStm* s) {
+    env.add_level();
+    ImpType newVarType;
+    newVarType.set_basic_type(ImpType::INT);
+    env.add_var(s->id, newVarType);
+    if(!s->start->accept(this).match(inttype)) {
+        cout << "El valor de inicio del for tiene que ser una expresión que retorne un entero." << endl;
+        exit(0);
+    }
+    if(!s->end->accept(this).match(inttype)) {
+        cout << "El valor de inicio del for tiene que ser una expresión que retorne un entero." << endl;
+        exit(0);
+    }
+    s->body->accept(this);
+    env.remove_level();
+}
+
 void ImpTypeChecker::visit(ReturnStatement* s) {
  ImpType rtype = env.lookup("return");
   ImpType etype;

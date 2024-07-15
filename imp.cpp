@@ -132,6 +132,7 @@ AssignStatement::AssignStatement(string id, Exp* e):id(id), rhs(e) { }
 PrintStatement::PrintStatement(Exp* e):e(e) { }
 IfStatement::IfStatement(Exp* c,Body *tb, Body* fb):cond(c),tbody(tb), fbody(fb) { }
 WhileStatement::WhileStatement(Exp* c,Body *b):cond(c),body(b) { }
+ForDoStm::ForDoStm(string id, Exp* start, Exp* end, Body* body):id(id), start(start), end(end), body(body) { }
 ReturnStatement::ReturnStatement(Exp* e):e(e) { }
 FCallStm::FCallStm(std::string fname, list<Exp *> args):fname(fname), args(args) { }
 
@@ -148,6 +149,7 @@ AssignStatement::~AssignStatement() { delete rhs; }
 PrintStatement::~PrintStatement() { delete e; }
 IfStatement::~IfStatement() { delete fbody; delete tbody; delete cond; }
 WhileStatement::~WhileStatement() { delete body; delete cond; }
+ForDoStm::~ForDoStm() { delete start; delete end; delete body; }
 ReturnStatement::~ReturnStatement() { delete e; }
 FCallStm::~FCallStm() { while (!args.empty()) { delete args.front(); args.pop_front(); } }
 
@@ -172,6 +174,10 @@ void IfStatement::accept(ImpVisitor* v) {
 }
 
 void WhileStatement::accept(ImpVisitor* v) {
+  return v->visit(this);
+}
+
+void ForDoStm::accept(ImpVisitor* v) {
   return v->visit(this);
 }
 
@@ -235,6 +241,10 @@ void WhileStatement::accept(ImpValueVisitor* v) {
   return v->visit(this);
 }
 
+void ForDoStm::accept(ImpValueVisitor* v) {
+    return v->visit(this);
+}
+
 void ReturnStatement::accept(ImpValueVisitor* v) {
   return v->visit(this);
 }
@@ -288,6 +298,10 @@ void IfStatement::accept(TypeVisitor* v) {
 
 void WhileStatement::accept(TypeVisitor* v) {
   return v->visit(this);
+}
+
+void ForDoStm::accept(TypeVisitor* v) {
+    return v->visit(this);
 }
 
 void ReturnStatement::accept(TypeVisitor* v) {
