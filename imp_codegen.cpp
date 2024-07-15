@@ -230,6 +230,22 @@ void ImpCodeGen::visit(ReturnStatement* s) {
   return;
 }
 
+void ImpCodeGen::visit(FCallStm* s) {
+    FEntry fentry = analysis->ftable.lookup(s->fname);
+    ImpType ftype = fentry.ftype;
+
+    list<Exp*>::iterator it = s->args.begin();
+    for (int i = 0; i < s->args.size(); i++) {
+        (*it)->accept(this);
+        std::advance(it, 1);
+    }
+    codegen(nolabel, "mark");
+    codegen(nolabel, "pusha", "L"+fentry.fname);
+    codegen(nolabel,"call");
+    return;
+
+}
+
 
 int ImpCodeGen::visit(BinaryExp* e) {
   e->left->accept(this);

@@ -109,6 +109,17 @@ public:
   virtual ~Stm() = 0;
 };
 
+class FCallStm : public Stm {
+public:
+  string fname;
+  list<Exp*> args;
+  FCallStm(string fname, list<Exp*> args);
+  void accept(ImpVisitor* v);
+  void accept(ImpValueVisitor* v);
+  void accept(TypeVisitor* v);
+  ~FCallStm();
+};
+
 class StatementList;
 class Body;
 

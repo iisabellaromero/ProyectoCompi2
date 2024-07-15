@@ -300,6 +300,18 @@ Stm* Parser::parseStatement() {
   Body *tb, *fb;
   if (match(Token::ID)) {
     string lex = previous->lexema;
+    if (match(Token::LPAREN)){
+        // esto es un fcallstm
+        list<Exp*> args;
+        if (!check(Token::RPAREN)) {
+            args.push_back(parseCExp());
+            while(match(Token::COMMA)) {
+                args.push_back(parseCExp());
+            }
+        }
+        if (!match(Token::RPAREN)) parserError("Expecting rparen");
+        return new FCallStm(lex,args);
+    }
     if (!match(Token::ASSIGN)) {
       cout << "Error: esperaba =" << endl;
       exit(0);

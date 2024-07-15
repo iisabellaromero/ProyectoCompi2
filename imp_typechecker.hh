@@ -51,6 +51,7 @@ public:
   void visit(IfStatement*);
   void visit(WhileStatement*);
   void visit(ReturnStatement* e);
+  void visit(FCallStm* s);
   
   ImpType visit(BinaryExp* e);
   ImpType visit(NumberExp* e);
