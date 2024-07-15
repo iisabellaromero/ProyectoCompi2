@@ -328,6 +328,10 @@ ImpType ImpTypeChecker::visit(FCallExp* e) {
     if (rtype.ttype != ImpType::VOID) {
         sp_incr(1);
     }
+    else {
+        cout << "Una expresión que llama una función no puede retornar VOID" << endl;
+        exit(0);
+    }
     // reducimos por la cantidad de argumentos ya que serán consumidos
     for (int i = 0; i < num_fcall_args; i++) {
         sp_decr(1);
